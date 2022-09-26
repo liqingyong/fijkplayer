@@ -33,6 +33,8 @@ part of fijkplayer;
 typedef FijkPanelWidgetBuilder = Widget Function(FijkPlayer player,
     FijkData data, BuildContext context, Size viewSize, Rect texturePos);
 
+typedef FijkChildWidgetBuilder = Widget Function(Widget child,BuildContext context);
+
 /// How a video should be inscribed into [FijkView].
 ///
 /// See also [BoxFit]
@@ -126,6 +128,7 @@ class FijkView extends StatefulWidget {
     this.cover,
     this.fs = true,
     this.onDispose,
+    this.widgetBuilder
   });
 
   /// The player that need display video by this [FijkView].
@@ -134,6 +137,8 @@ class FijkView extends StatefulWidget {
 
   /// builder to build panel Widget
   final FijkPanelWidgetBuilder panelBuilder;
+
+  final FijkChildWidgetBuilder? widgetBuilder;
 
   /// This method will be called when fijkView dispose.
   /// FijkData is managed inner FijkView. User can change fijkData in custom panel.
@@ -179,8 +184,7 @@ class _FijkViewState extends State<FijkView> {
   double _vWidth = -1;
   double _vHeight = -1;
   bool _fullScreen = false;
-  //系统默认是否横屏
-  bool get _isDefFullScreen => MediaQuery.of(context).orientation == Orientation.landscape;
+
   FijkData _fijkData = FijkData();
   ValueNotifier<int> paramNotifier = ValueNotifier(0);
 
@@ -226,15 +230,9 @@ class _FijkViewState extends State<FijkView> {
     if (widget.fs) {
       if (value.fullScreen && !_fullScreen) {
         _fullScreen = true;
-        if (value.fullScreenRoute)
-          await _pushFullScreenWidget(context);//进入全屏 - 路由跳转方式
-        else
-          await _pushFullScreenWidgetNews(context);//进入全屏  - 强制旋转屏幕
+        await _pushFullScreenWidget(context);
       } else if (_fullScreen && !value.fullScreen) {
-        if (value.fullScreenRoute)//进入全屏 - 路由回退
-          Navigator.of(context).pop();//退出全屏
-        else
-          _exitFullScreenWidgetNews(context);//退出全屏 -旋转屏幕
+        Navigator.of(context).pop();
         _fullScreen = false;
       }
 
@@ -273,14 +271,15 @@ class _FijkViewState extends State<FijkView> {
     return AnimatedBuilder(
       animation: animation,
       builder: (BuildContext context, Widget? child) {
+        Widget wh = _InnerFijkView(
+          fijkViewState: this,
+          fullScreen: true,
+          cover: widget.cover,
+          data: _fijkData,
+        );
         return Scaffold(
           resizeToAvoidBottomInset: false,
-          body: _InnerFijkView(
-            fijkViewState: this,
-            fullScreen: true,
-            cover: widget.cover,
-            data: _fijkData,
-          ),
+          body: widget.widgetBuilder!=null ?widget.widgetBuilder!(wh,context):wh,
         );
       },
     );
@@ -297,7 +296,7 @@ class _FijkViewState extends State<FijkView> {
       pageBuilder: _fullScreenRoutePageBuilder,
     );
 
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+    await SystemChrome.setEnabledSystemUIOverlays([]);
     bool changed = false;
     var orientation = MediaQuery.of(context).orientation;
     FijkLog.d("start enter fullscreen. orientation:$orientation");
@@ -313,39 +312,14 @@ class _FijkViewState extends State<FijkView> {
     await Navigator.of(context).push(route);
     _fullScreen = false;
     widget.player.exitFullScreen();
-    await SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.manual, overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom]);
+    await SystemChrome.setEnabledSystemUIOverlays(
+        [SystemUiOverlay.top, SystemUiOverlay.bottom]);
     if (changed) {
       if (_vWidth >= _vHeight) {
         await FijkPlugin.setOrientationPortrait();
       } else {
         await FijkPlugin.setOrientationLandscape();
       }
-    }
-  }
-
-  Future<dynamic> _pushFullScreenWidgetNews(BuildContext context) async {
-    // 强制横屏
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-    if (_isDefFullScreen) return;
-    if (_vWidth >= _vHeight) {
-      if (MediaQuery.of(context).orientation == Orientation.portrait)
-        await FijkPlugin.setOrientationLandscape();
-    } else {
-      if (MediaQuery.of(context).orientation == Orientation.landscape)
-        await FijkPlugin.setOrientationPortrait();
-    }
-  }
-
-  Future<dynamic> _exitFullScreenWidgetNews(BuildContext context) async {
-    // 退出横屏
-    await SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.manual, overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom]);
-    if (_isDefFullScreen) return;
-    if (_vWidth >= _vHeight) {
-      await FijkPlugin.setOrientationPortrait();
-    } else {
-      await FijkPlugin.setOrientationLandscape();
     }
   }
 

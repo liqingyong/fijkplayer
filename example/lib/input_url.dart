@@ -6,12 +6,12 @@ import 'recent_list.dart';
 import 'media_item.dart';
 
 class InputScreen extends StatelessWidget {
-  final TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController(text: "http://39.135.46.246:6610/PLTV/77777777/224/3221225657/index.m3u8?");
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: FijkAppBar.defaultSetting(title: "Input Url"),
+      //appBar: FijkAppBar.defaultSetting(title: "Input Url"),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[

@@ -59,7 +59,12 @@ class FijkPlayer extends ChangeNotifier implements ValueListenable<FijkValue> {
     _value = newValue;
     notifyListeners();
   }
+  
+  void setSize(Size size) {
+    _setValue(value.copyWith(size: size));
+  }
 
+  
   Duration _bufferPos = Duration();
 
   /// return the current buffered position

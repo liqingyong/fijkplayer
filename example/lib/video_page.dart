@@ -36,7 +36,7 @@ class _VideoScreenState extends State<VideoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: FijkAppBar.defaultSetting(title: "Video"),
+      //appBar: FijkAppBar.defaultSetting(title: "Video"),
       body: Container(
         child: Center(
           child: FijkView(
