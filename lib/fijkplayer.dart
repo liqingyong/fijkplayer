@@ -37,6 +37,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:wakelock/wakelock.dart';
 
 part 'core/fijklog.dart';
 part 'core/fijkoption.dart';

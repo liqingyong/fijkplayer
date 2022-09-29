@@ -597,6 +597,18 @@ class FijkPlayer extends ChangeNotifier implements ValueListenable<FijkValue> {
     _setValue(value.copyWith(exception: exception));
   }
 
+  //初始化屏幕常量
+  initEnableWakelock() {
+    WidgetsFlutterBinding.ensureInitialized();
+    Wakelock.enable();
+  }
+
+  //关闭屏幕常量
+  disableWakelock() {
+    Wakelock.disable();
+  }
+
+
   @override
   String toString() {
     return 'FijkPlayer{id:$_playerId}';

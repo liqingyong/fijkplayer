@@ -198,6 +198,7 @@ class _FijkViewState extends State<FijkView> {
     }
     widget.player.addListener(_fijkValueListener);
     _nativeSetup();
+    widget.player.initEnableWakelock();
   }
 
   Future<void> _nativeSetup() async {
@@ -264,6 +265,7 @@ class _FijkViewState extends State<FijkView> {
     }
 
     widget.onDispose?.call(_fijkData);
+    widget.player.disableWakelock();
   }
 
   AnimatedWidget _defaultRoutePageBuilder(
@@ -296,7 +298,7 @@ class _FijkViewState extends State<FijkView> {
       pageBuilder: _fullScreenRoutePageBuilder,
     );
 
-    await SystemChrome.setEnabledSystemUIOverlays([]);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     bool changed = false;
     var orientation = MediaQuery.of(context).orientation;
     FijkLog.d("start enter fullscreen. orientation:$orientation");
@@ -312,8 +314,8 @@ class _FijkViewState extends State<FijkView> {
     await Navigator.of(context).push(route);
     _fullScreen = false;
     widget.player.exitFullScreen();
-    await SystemChrome.setEnabledSystemUIOverlays(
-        [SystemUiOverlay.top, SystemUiOverlay.bottom]);
+    await SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual, overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom]);
     if (changed) {
       if (_vWidth >= _vHeight) {
         await FijkPlugin.setOrientationPortrait();
@@ -384,6 +386,7 @@ class __InnerFijkViewState extends State<_InnerFijkView> {
     if (widget.fullScreen) {
       widget.fijkViewState.paramNotifier.addListener(_voidValueListener);
     }
+    _player.initEnableWakelock();
   }
 
   FijkView get fView => widget.fijkViewState.widget;
@@ -519,6 +522,7 @@ class __InnerFijkViewState extends State<_InnerFijkView> {
     super.dispose();
     fView.player.removeListener(_fijkValueListener);
     widget.fijkViewState.paramNotifier.removeListener(_fijkValueListener);
+    fView.player.disableWakelock();
   }
 
   @override

@@ -12,6 +12,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  wakelock: ^0.6.2 #锁
 
 dev_dependencies:
   flutter_test:
